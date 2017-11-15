@@ -27,7 +27,6 @@ lexer = ox.make_lexer([
 ])
 
 tokens_list = [
-    'NUMBER',
     'OPENING_BLOCK',
     'CLOSING_BLOCK',
     'RIGHT_TAPE',
@@ -35,19 +34,26 @@ tokens_list = [
     'SUM',
     'SUB',
     'PRINT',
-    'READ'
+    'READ',
+    'NUMBER',
+    'NAME',
 ]
 
 parser = ox.make_parser([
-    ('lisp_list: lisp_list atom', treat_list),
-    ('lisp_list: atom', treat_atom),
-    ('atom: RIGHT_TAPE', treat_atom),
-    ('atom: LEFT_TAPE', treat_atom),
-    ('atom: SUM', treat_atom),
-    ('atom: SUB', treat_atom),
-    ('atom: PRINT', treat_atom),
-    ('atom: READ', treat_atom),
-    ('atom: NUMBER', lambda number : ('simple_number', float(number))),
-    ('atom: NAME', lambda name : ('simple_name', name)),
+    ('lisp_list : lisp_list atom', treat_list),
+    ('lisp_list : atom', treat_atom),
+    ('atom : NUMBER', lambda number : ('simple_number', float(number))),
+    ('atom : NAME', lambda name : ('simple_name', name)),
+    ('atom : RIGHT_TAPE', treat_atom),
+    ('atom : LEFT_TAPE', treat_atom),
+    ('atom : SUM', treat_atom),
+    ('atom : SUB', treat_atom),
+    ('atom : PRINT', treat_atom),
+    ('atom : READ', treat_atom),
 ], tokens_list)
 
+expr = input('expr: ')
+tokens = lexer(expr)
+# ast = parser(tokens)
+print('tokens: ', tokens)
+# print('ast: ', ast)
