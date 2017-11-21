@@ -24,17 +24,20 @@ tokens_list = [
 ]
 
 parser = ox.make_parser([
-    ('term : OPENING_BLOCK term CLOSING_BLOCK', lambda opening_block, atom, closing_block: (opening_block, atom, closing_block)),
+    ('term : OPENING_BLOCK term CLOSING_BLOCK', lambda opening_block, atom, closing_block: atom),
     ('term : term term', lambda term, term2: (term, term2)),
     ('term : term atom', lambda term, atom: (term, atom)),
     ('term : atom term', lambda atom, term: (atom, term)),
     ('term : atom', lambda term: term),
     ('atom : NUMBER', lambda x: float(x)),
     ('atom : NAME', lambda name: name),
-    ('atom : OPENING_BLOCK CLOSING_BLOCK', lambda opening_block, closing_block: (opening_block, closing_block)),
+    ('atom : OPENING_BLOCK CLOSING_BLOCK', lambda opening_block, closing_block: ()),
 ], tokens_list)
+
+pp = pprint.PrettyPrinter(width=60, compact=True)
+
 
 tokens = lexer(code)
 tokens = [value for value in tokens if str(value)[:7] != 'COMMENT' and str(value)[:8] != 'NEW_LINE']
 ast = parser(tokens)
-print('ast: ', ast)
+pp.pprint(ast)
