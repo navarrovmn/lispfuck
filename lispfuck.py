@@ -1,34 +1,19 @@
 from sys import argv
+import pprint 
 import ox
 
 file_name, lf_source = argv
 
 in_file = open(lf_source)
-text = in_file.readlines()
-
-def is_comment(line):
-    count = 0
-    while line[count] == ' ':
-        count+=1
-    if line[count] == ';':
-         return True
-    return False
-
-code = ""
-
-for line in text:
-    if is_comment(line):
-         continue
-    code += line.strip('\n')
-
-print(code)
+code = in_file.read()
 
 lexer = ox.make_lexer([
     ('OPENING_BLOCK', r'\('),
     ('CLOSING_BLOCK', r'\)'),
     ('NUMBER', r'\d+(\.\d*)?'),
-    ('NAME', r'[a-zA-Z_][a-zA-Z_0-9]*'),
-    ('COMMENT', r';')
+    ('NAME', r'[a-zA-Z_][a-zA-Z_0-9-]*'),
+    ('COMMENT', r';(.)*'),
+    ('NEW_LINE', r'\n+'),
 ])
 
 tokens_list = [
@@ -36,7 +21,6 @@ tokens_list = [
     'CLOSING_BLOCK',
     'NUMBER',
     'NAME',
-        'COMMENT',
 ]
 
 parser = ox.make_parser([
@@ -47,9 +31,10 @@ parser = ox.make_parser([
     ('term : atom', lambda term: term),
     ('atom : NUMBER', lambda x: float(x)),
     ('atom : NAME', lambda name: name),
+    ('atom : OPENING_BLOCK CLOSING_BLOCK', lambda opening_block, closing_block: (opening_block, closing_block)),
 ], tokens_list)
 
 tokens = lexer(code)
+tokens = [value for value in tokens if str(value)[:7] != 'COMMENT' and str(value)[:8] != 'NEW_LINE']
 ast = parser(tokens)
-print('tokens: ', tokens)
 print('ast: ', ast)
