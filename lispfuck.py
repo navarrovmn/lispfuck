@@ -1,5 +1,5 @@
 from sys import argv
-import pprint 
+import pprint
 import ox
 
 file_name, lf_source = argv
@@ -36,8 +36,9 @@ parser = ox.make_parser([
 
 pp = pprint.PrettyPrinter(width=60, compact=True)
 
-
 tokens = lexer(code)
 tokens = [value for value in tokens if str(value)[:7] != 'COMMENT' and str(value)[:8] != 'NEW_LINE']
 ast = parser(tokens)
 pp.pprint(ast)
+head, *tail = ast
+print(head)
