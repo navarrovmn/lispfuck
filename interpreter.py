@@ -1,38 +1,47 @@
 import sys
 
-cells = [33 for x in range(1000)]
+cells = [0 for x in range(1000)]
 current = 0
-
-print('SASA')
 
 def right():
     global current
     current += 1
 
 def left():
+    global cells
     global current
+
     if(current == 0):
         cells.append(0)
     else:
         current -= 1
 
 def print_cell():
-    print(chr(cells[current]), end='')
+    global cells
+    global current
+
+    print(cells[current])
+    # print(chr(cells[current]), end='')
 
 def read():
-    cells[current] = ord(sys.stdin.read(1))
+    ...
 
 def loop():
     ...
 
 def inc():
-    cells[current] += (cells[current] + 1)%256
+    global cells
+    global current
+
+    cells[current] = (cells[current] + 1)%256
+    print(cells[current])
 
 def dec():
-    if(cells[current] > 0):
-        cells[current] += (cells[current] - 1)%256
+    global cells
+    global current
 
-print('SASA1')
+    if(cells[current] > 0):
+        cells[current] = (cells[current] - 1)%256
 
 node_to_func = {
     'right': right(),
@@ -43,13 +52,10 @@ node_to_func = {
     'read': read(),
 }
 
-print('SASA2')
-
 def eval(ast):
-    head, *tail = ast
-
-    if(head in node_to_func):
-        node_to_func[head]()
+    if(ast in node_to_func):
+        print(ast)
+        node_to_func[ast]
     else:
         raise ValueError('Maybe you are doing something wrong?')
 
@@ -57,8 +63,6 @@ def eval(ast):
 def run_code(ast):
     for x in ast:
         eval(x)
-
-print('SASA3')
 
 test_case = ['inc', 'inc', 'inc', 'print', 'right', 'inc', 'print']
 
