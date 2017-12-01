@@ -1,10 +1,12 @@
 import sys
 
+funcs_with_args = []
 cells = [0 for x in range(1000)]
 current = 0
 
 def right():
     global current
+
     current += 1
 
 def left():
@@ -17,53 +19,76 @@ def left():
         current -= 1
 
 def print_cell():
-    global cells
-    global current
-
-    print(cells[current])
-    # print(chr(cells[current]), end='')
-
-def read():
-    ...
-
-def loop():
-    ...
+    print(chr(cells[current]))
 
 def inc():
-    global cells
     global current
 
     cells[current] = (cells[current] + 1)%256
-    print(cells[current])
+
+def add(num):
+    global current
+
+    cells[current] = (cells[current] + num[0])%256
+
+def sub(num):
+    global current
+
+    cells[current] = (cells[current] - num[0])%256
 
 def dec():
-    global cells
     global current
 
     if(cells[current] > 0):
         cells[current] = (cells[current] - 1)%256
 
+# todo
+
+def do(args):
+    for operation in args:
+        print(operation)
+        if isinstance(operation, str):
+            if operation in node_to_func:
+                func = node_to_func[operation]
+                func()
+            else:
+                func = node_to_func_with_args[operation]
+                func(tail)
+        elif isinstance(operation, list):
+            eval(operation)
+
+
 node_to_func = {
-    'right': right(),
-    'left': left(),
-    'inc': inc(),
-    'dec': dec(),
-    'print': print_cell(),
-    'read': read(),
+    'right': right,
+    'left': left,
+    'inc': inc,
+    'dec': dec,
+    'print': print_cell,
+}
+
+node_to_func_with_args = {
+    'add': add,
+    'sub': sub,
+    'do': do,
+    'do-before': do,
+    'do-after': do,
 }
 
 def eval(ast):
-    if(ast in node_to_func):
-        print(ast)
-        node_to_func[ast]
+    head, *tail = ast
+
+    if(head in node_to_func):
+        func = node_to_func[head]
+        func()
+    elif(head in node_to_func_with_args):
+        func = node_to_func_with_args[head]
+        func(tail)
+    elif(isinstance(ast, int)):
+        func = funcs_with_args.pop()
+        func(tail)
     else:
-        raise ValueError('Maybe you are doing something wrong?')
+        raise ValueError("Maybe you are doing something wrong?")
 
 
-def run_code(ast):
-    for x in ast:
-        eval(x)
-
-test_case = ['inc', 'inc', 'inc', 'print', 'right', 'inc', 'print']
-
-run_code(test_case)
+program = ['do', 'inc', 'print', ['do', 'print', ['add', 2], 'print']]
+eval(program)
