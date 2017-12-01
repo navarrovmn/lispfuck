@@ -1,4 +1,4 @@
-import sys
+from getch import getche
 
 class Interpreter:
     def right(self):
@@ -11,10 +11,11 @@ class Interpreter:
             self.current -= 1
 
     def print_cell(self):
-        print(chr(self.cells[self.current]))
+        print(chr(int(self.cells[self.current])))
 
-    #def read_cell(self):
-    #    self.cells[self.current] = int(sys.stdin.read(1))
+    def read_cell(self):
+        self.cells[self.current] = ord(getche())
+        getche()
 
     def inc(self):
         self.cells[self.current] = (self.cells[self.current] + 1)%256
@@ -78,14 +79,14 @@ class Interpreter:
         elif(head in self.node_to_func_with_args):
             func = self.node_to_func_with_args[head]
             func(tail)
-        elif(isinstance(head, int)):
+        elif(isinstance(head, float)):
             func = self.funcs_with_args.pop()
             func(tail)
         else:
             raise ValueError("Maybe you are doing something wrong?")
 
     def __init__(self, ast):
-        self.cells = [0 for x in range(1000)]
+        self.cells = [97 for x in range(1000)]
         self.current = 0
         self.command_list = ast
 
@@ -95,7 +96,7 @@ class Interpreter:
             'inc': self.inc,
             'dec': self.dec,
             'print': self.print_cell,
-            #'read': self.read_cell,
+            'read': self.read_cell,
         }
 
         self.node_to_func_with_args = {
@@ -106,19 +107,3 @@ class Interpreter:
             'do-after': self.do_after,
             'loop': self.loop,
         }
-
-test = ["do-after", "print", ["inc", "inc"]]
-test2 = ["do", ["add", 2], "print"]
-test3 = ["do-before", "print", ["inc", "inc"]]
-test4 = ["do", "read", ["add", 97], "print"]
-test5 = ['do', 
-            ['add', 2], 'right', ['add', 3], 'left', 
-            ['loop', 
-                'dec', 'right', 'inc', 'left'
-            ], 
-            'right', ['add', 48], 
-            'print'
-        ]
-
-inte = Interpreter(test5)
-inte.eval(inte.command_list)

@@ -1,5 +1,5 @@
 from sys import argv
-import interpreter
+from interpreter import Interpreter
 import pprint
 import ox
 
@@ -9,39 +9,62 @@ in_file = open(lf_source)
 code = in_file.read()
 
 lexer = ox.make_lexer([
-    ('OPENING_BLOCK', r'\('),
-    ('CLOSING_BLOCK', r'\)'),
-    ('NUMBER', r'\d+(\.\d*)?'),
-    ('NAME', r'[a-zA-Z_][a-zA-Z_0-9-]*'),
-    ('COMMENT', r';(.)*'),
-    ('NEW_LINE', r'\n+'),
+    ('NUMBER', r'\d+'),
+    ('NAME', r'[-a-zA-Z]+'),
+    ('COMMENT', r';.*'),
+    ('NEWLINE', r'\n'),
+    ('SPACE', r'\s+'),
+    ('RIGHT', r'right'),
+    ('LEFT', r'left'),
+    ('INC', r'inc'),
+    ('DEC', r'dec'),
+    ('ADD',r'add'),
+    ('SUB',r'sub'),
+    ('PRINT', r'print'),
+    ('READ', r'read'),
+    ('DO',r'do'),
+    ('LOOP', r'loop'),
+    ('DEF', r'def'),
+    ('PARENTHESIS_B', r'\('),
+    ('PARENTHESIS_A', r'\)')
 ])
 
-tokens_list = [
-    'OPENING_BLOCK',
-    'CLOSING_BLOCK',
-    'NUMBER',
-    'NAME',
-]
+#Seting tokens
+tokens = ['NUMBER','INC', 'DEC','SUB', 'ADD','RIGHT', 'LEFT','PRINT','DO','NAME','LOOP',
+            'READ','DEF','PARENTHESIS_A','PARENTHESIS_B']
 
+op = lambda op: (op)
+operator = lambda type_op: (type_op)
+
+#making parser
 parser = ox.make_parser([
-    ('term : OPENING_BLOCK term CLOSING_BLOCK', lambda opening_block, atom, closing_block: atom),
-    ('term : term term', lambda term, term2: [term, term2]),
-    ('term : term atom', lambda term, atom: [term, atom]),
-    ('term : atom term', lambda atom, term: [atom, term]),
-    ('term : atom', lambda term: term),
-    ('atom : NUMBER', lambda x: float(x)),
-    ('atom : NAME', lambda name: name),
-    ('atom : OPENING_BLOCK CLOSING_BLOCK', lambda opening_block, closing_block: ()),
-], tokens_list)
+    ('program : PARENTHESIS_B expr PARENTHESIS_A', lambda x,y,z: y),
+    ('program : PARENTHESIS_B PARENTHESIS_A', lambda x,y: '()'),
+    ('expr : operator expr', lambda x,y: [x,] + y),
+    ('expr : operator', lambda x: [x,]),
+    ('operator : program', operator),
+    ('operator : LOOP', operator),
+    ('operator : DO', operator),
+    ('operator : RIGHT', operator),
+    ('operator : LEFT', operator),
+    ('operator : READ', operator),
+    ('operator : INC', operator),
+    ('operator : DEC', operator),
+    ('operator : DEF', operator),
+    ('operator : PRINT', operator),
+    ('operator : ADD', operator),
+    ('operator : SUB', operator),
+    ('operator : NAME', operator),
+    ('operator : NUMBER', lambda x: float(x)),
+], tokens)
+
 
 pp = pprint.PrettyPrinter(width=60, compact=True)
 
 tokens = lexer(code)
-tokens = [value for value in tokens if str(value)[:7] != 'COMMENT' and str(value)[:8] != 'NEW_LINE']
+tokens = [token for token in tokens if token.type != 'COMMENT' and token.type != 'SPACE']
 ast = parser(tokens)
-# pp.pprint(ast)
 print(ast)
-head, *tail = ast
 
-# run_code(ast)
+interpreter = Interpreter(ast)
+interpreter.eval(interpreter.command_list)
