@@ -13,8 +13,8 @@ class Interpreter:
     def print_cell(self):
         print(chr(self.cells[self.current]))
 
-    def read_cell(self):
-        self.cells[self.current] = int(sys.stdin.read(1))
+    #def read_cell(self):
+    #    self.cells[self.current] = int(sys.stdin.read(1))
 
     def inc(self):
         self.cells[self.current] = (self.cells[self.current] + 1)%256
@@ -26,7 +26,7 @@ class Interpreter:
         self.cells[self.current] = (self.cells[self.current] - num[0])%256
 
     def dec(self):
-        if(self.cells[current] > 0):
+        if(self.cells[self.current] > 0):
             self.cells[self.current] = (self.cells[self.current] - 1)%256
 
     def do(self, args):
@@ -65,9 +65,13 @@ class Interpreter:
         another_tail.insert(0, 'do')
         self.eval(another_tail)
 
+    def loop(self, args):
+        while(self.cells[self.current]):
+            self.do(args)
+
     def eval(self, commands):
         head, *tail = commands
-
+        
         if(head in self.node_to_func):
             func = self.node_to_func[head]
             func()
@@ -81,7 +85,7 @@ class Interpreter:
             raise ValueError("Maybe you are doing something wrong?")
 
     def __init__(self, ast):
-        self.cells = [97 for x in range(1000)]
+        self.cells = [0 for x in range(1000)]
         self.current = 0
         self.command_list = ast
 
@@ -91,7 +95,7 @@ class Interpreter:
             'inc': self.inc,
             'dec': self.dec,
             'print': self.print_cell,
-            'read': self.read_cell,
+            #'read': self.read_cell,
         }
 
         self.node_to_func_with_args = {
@@ -100,12 +104,21 @@ class Interpreter:
             'do': self.do,
             'do-before': self.do_before,
             'do-after': self.do_after,
+            'loop': self.loop,
         }
 
 test = ["do-after", "print", ["inc", "inc"]]
 test2 = ["do", ["add", 2], "print"]
 test3 = ["do-before", "print", ["inc", "inc"]]
 test4 = ["do", "read", ["add", 97], "print"]
+test5 = ['do', 
+            ['add', 2], 'right', ['add', 3], 'left', 
+            ['loop', 
+                'dec', 'right', 'inc', 'left'
+            ], 
+            'right', ['add', 48], 
+            'print'
+        ]
 
-interp = Interpreter(test4)
-interp.eval(interp.command_list)
+inte = Interpreter(test5)
+inte.eval(inte.command_list)
