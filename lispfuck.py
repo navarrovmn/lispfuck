@@ -1,4 +1,5 @@
 from sys import argv
+import interpreter
 import pprint
 import ox
 
@@ -25,9 +26,9 @@ tokens_list = [
 
 parser = ox.make_parser([
     ('term : OPENING_BLOCK term CLOSING_BLOCK', lambda opening_block, atom, closing_block: atom),
-    ('term : term term', lambda term, term2: (term, term2)),
-    ('term : term atom', lambda term, atom: (term, atom)),
-    ('term : atom term', lambda atom, term: (atom, term)),
+    ('term : term term', lambda term, term2: [term, term2]),
+    ('term : term atom', lambda term, atom: [term, atom]),
+    ('term : atom term', lambda atom, term: [atom, term]),
     ('term : atom', lambda term: term),
     ('atom : NUMBER', lambda x: float(x)),
     ('atom : NAME', lambda name: name),
@@ -39,6 +40,8 @@ pp = pprint.PrettyPrinter(width=60, compact=True)
 tokens = lexer(code)
 tokens = [value for value in tokens if str(value)[:7] != 'COMMENT' and str(value)[:8] != 'NEW_LINE']
 ast = parser(tokens)
-pp.pprint(ast)
+# pp.pprint(ast)
+print(ast)
 head, *tail = ast
-print(head)
+
+# run_code(ast)

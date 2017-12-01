@@ -1,94 +1,76 @@
 import sys
 
-funcs_with_args = []
-cells = [0 for x in range(1000)]
-current = 0
+class Interpreter:
+    def right(self):
+        self.current += 1
 
-def right():
-    global current
+    def left(self):
+        if(self.current == 0):
+            self.cells.append(0)
+        else:
+            self.current -= 1
 
-    current += 1
+    def print_cell(self):
+        print(chr(self.cells[self.current]))
 
-def left():
-    global cells
-    global current
+    def inc(self):
+        self.cells[self.current] = (self.cells[self.current] + 1)%256
 
-    if(current == 0):
-        cells.append(0)
-    else:
-        current -= 1
+    def add(self, num):
+        self.cells[self.current] = (self.cells[self.current] + num[0])%256
 
-def print_cell():
-    print(chr(cells[current]))
+    def sub(self, num):
+        self.cells[self.current] = (self.cells[self.current] - num[0])%256
 
-def inc():
-    global current
+    def dec(self):
+        if(self.cells[current] > 0):
+            self.cells[self.current] = (self.cells[self.current] - 1)%256
 
-    cells[current] = (cells[current] + 1)%256
-
-def add(num):
-    global current
-
-    cells[current] = (cells[current] + num[0])%256
-
-def sub(num):
-    global current
-
-    cells[current] = (cells[current] - num[0])%256
-
-def dec():
-    global current
-
-    if(cells[current] > 0):
-        cells[current] = (cells[current] - 1)%256
-
-# todo
-
-def do(args):
-    for operation in args:
-        print(operation)
-        if isinstance(operation, str):
-            if operation in node_to_func:
-                func = node_to_func[operation]
-                func()
-            else:
-                func = node_to_func_with_args[operation]
-                func(tail)
-        elif isinstance(operation, list):
-            eval(operation)
+    def do(self, args):
+        for operation in args:
+            if isinstance(operation, str):
+                if operation in self.node_to_func:
+                    func = self.node_to_func[operation]
+                    func()
+                else:
+                    func = self.node_to_func_with_args[operation]
+                    func()
+            elif isinstance(operation, list):
+                self.eval(operation)
 
 
-node_to_func = {
-    'right': right,
-    'left': left,
-    'inc': inc,
-    'dec': dec,
-    'print': print_cell,
-}
+    def eval(self, commands):
+        head, *tail = commands
 
-node_to_func_with_args = {
-    'add': add,
-    'sub': sub,
-    'do': do,
-    'do-before': do,
-    'do-after': do,
-}
+        if(head in self.node_to_func):
+            func = self.node_to_func[head]
+            self.func()
+        elif(head in self.node_to_func_with_args):
+            func = self.node_to_func_with_args[head]
+            func(tail)
+        elif(isinstance(ast, int)):
+            func = self.funcs_with_args.pop()
+            self.func(tail)
+        else:
+            raise ValueError("Maybe you are doing something wrong?")
 
-def eval(ast):
-    head, *tail = ast
+    def __init__(self, ast):
+        self.cells = [0 for x in range(1000)]
+        self.current = 0
+        self.command_list = ast
 
-    if(head in node_to_func):
-        func = node_to_func[head]
-        func()
-    elif(head in node_to_func_with_args):
-        func = node_to_func_with_args[head]
-        func(tail)
-    elif(isinstance(ast, int)):
-        func = funcs_with_args.pop()
-        func(tail)
-    else:
-        raise ValueError("Maybe you are doing something wrong?")
+        self.node_to_func = {
+            'right': self.right,
+            'left': self.left,
+            'inc': self.inc,
+            'dec': self.dec,
+            'print': self.print_cell,
+        }
 
-
-program = ['do', 'inc', 'print', ['do', 'print', ['add', 2], 'print']]
-eval(program)
+        self.node_to_func_with_args = {
+            'add': self.add,
+            'sub': self.sub,
+            'do': self.do,
+            'do-before': self.do,
+            'do-after': self.do,
+        }
