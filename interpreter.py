@@ -1,4 +1,4 @@
-
+from getch import getche
 class Interpreter:
     def right(self):
         self.current += 1
