@@ -3,7 +3,7 @@ from interpreter import Interpreter
 import pprint
 import ox
 
-file_name, lf_source = argv
+lf_source = argv[1]
 
 in_file = open(lf_source)
 code = in_file.read()
@@ -64,7 +64,6 @@ pp = pprint.PrettyPrinter(width=60, compact=True)
 tokens = lexer(code)
 tokens = [token for token in tokens if token.type != 'COMMENT' and token.type != 'SPACE']
 ast = parser(tokens)
-print(ast)
 
 interpreter = Interpreter(ast)
 interpreter.eval(interpreter.command_list)

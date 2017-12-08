@@ -1,4 +1,3 @@
-from getch import getche
 
 class Interpreter:
     def right(self):
@@ -16,6 +15,7 @@ class Interpreter:
     def read_cell(self):
         self.cells[self.current] = ord(getche())
         getche()
+
 
     def inc(self):
         self.cells[self.current] = (self.cells[self.current] + 1)%256
@@ -36,11 +36,23 @@ class Interpreter:
                 if operation in self.node_to_func:
                     func = self.node_to_func[operation]
                     func()
+                elif operation in self.node_to_func_def:
+                    arguments = self.node_to_func_def[operation]
+                    self.eval(arguments)
                 else:
-                    func = self.node_to_func_with_args[operation]
-                    func()
+                    raise ValueError("That operation does not exist")
             elif isinstance(operation, list):
                 self.eval(operation)
+
+    def define(self, args):
+        head, parenthesis, list_of_commands, *tail = args
+        commands = []
+        for command in list_of_commands:
+            commands.append(command)
+
+        self.node_to_func_def[head] = commands
+        self.do(tail)
+
 
     def do_after(self, args):
         head, *tail = args
@@ -72,21 +84,18 @@ class Interpreter:
 
     def eval(self, commands):
         head, *tail = commands
-        
+
         if(head in self.node_to_func):
             func = self.node_to_func[head]
             func()
         elif(head in self.node_to_func_with_args):
             func = self.node_to_func_with_args[head]
             func(tail)
-        elif(isinstance(head, float)):
-            func = self.funcs_with_args.pop()
-            func(tail)
         else:
-            raise ValueError("Maybe you are doing something wrong?")
+            raise ValueError("That operation does not exist")
 
     def __init__(self, ast):
-        self.cells = [97 for x in range(1000)]
+        self.cells = [0 for x in range(1000)]
         self.current = 0
         self.command_list = ast
 
@@ -106,4 +115,7 @@ class Interpreter:
             'do-before': self.do_before,
             'do-after': self.do_after,
             'loop': self.loop,
+            'def': self.define,
         }
+
+        self.node_to_func_def = {}
